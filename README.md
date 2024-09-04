@@ -1,0 +1,2 @@
+# photo-gallery
+criando_uma_galeria_de_fotos_utilizando_Laravel_com_opções_de_upload_e_delete_de_arquivos_com_integração_com_serviço_de_nuvem
