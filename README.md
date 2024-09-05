@@ -13,3 +13,15 @@ criando_uma_galeria_de_fotos_utilizando_Laravel_com_opções_de_upload_e_delete_
 ## criando o projeto Laravel
 para criar é necessario ter o php e o 'composer' instalado e utilizar o seguinte comando:
 `composer create-project laravel/laravel nome-do-projeto`
+
+## quando clonar o repositório do github
+copiar o arquivo `.env.example` e renomear para `.env` criar um banco de dados e enseri-lo em 'DB_DATABASE' do arquivo
+
+## alterar configuarações do laravel
+o laravel por padrão deixa uns arquivos que não são necessarios ser mechidos escondidos, mas para publica-los utilize o seguinte comando:
+`php artisan config:publish`
+
+após esse comando ele mostrará qual arquivo deseja publicar para alterar
+
+## criar ou alterar as tabelas no banco de dados
+`php artisan migrate`
