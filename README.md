@@ -25,3 +25,10 @@ após esse comando ele mostrará qual arquivo deseja publicar para alterar
 
 ## criar ou alterar as tabelas no banco de dados
 `php artisan migrate`
+
+## executar o projeto criado
+`php artisan server`
+
+## criar components
+componente são partes reutilizáveis de código que encapsulam determinada lógica ou apresentação de interface do usuário
+`php artisan make:component Image`
