@@ -27,7 +27,7 @@ após esse comando ele mostrará qual arquivo deseja publicar para alterar
 `php artisan migrate`
 
 ## executar o projeto criado
-`php artisan server`
+`php artisan serve`
 
 ## criar components
 componente são partes reutilizáveis de código que encapsulam determinada lógica ou apresentação de interface do usuário
