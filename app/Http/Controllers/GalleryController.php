@@ -29,10 +29,18 @@ class GalleryController extends Controller {
         }
 
         return redirect()-> route('index');     // retorna para o index 'automaticamente'
-        return true;
     }
 
-    public function delete(Request $request) {          // função que 'deleta' a imagem
-        
+    public function delete($id) {          // função que 'deleta' a imagem
+         $image = Image::findOrFail($id);
+         $url = parse_url($image->url);     // transforma o caminho da imagem do banco de dados em uma url
+         $path = ltrim($url['path'], '/storage\/');     // 'ltrim' remove a pasta storage
+         
+         if(Storage::disk('public')->exists($path)) {       // se a imagem existir
+            Storage::disk('public')->delete($path);     // exclui do 'localstorage'
+             $image->delete();      // em seguida exclui a imagem do banco de dados            
+         }
+
+         return redirect()->route('index');
     }
 }
