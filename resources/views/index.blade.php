@@ -32,7 +32,9 @@
         </div>     
     </header>
     <main class="gallery-container wrapper">
-   
+
+        @foreach ($images as $$image)            
+        
         <x-image url="./assets/images/img-1.png" title="Doguinho" />
         <x-image url="./assets/images/img-2.png" title="Cafézinho!!" />
         <x-image url="./assets/images/img-3.png" title="Fériasss!!" />
@@ -45,7 +47,8 @@
         <x-image url="./assets/images/img-10.png" title="Pedal Monstro!!!" />
         <x-image url="./assets/images/img-11.png" title="Outro Doguinho" />
         <x-image url="./assets/images/img-12.png" title="Fim de tarde!" />
-
+        
+        @endforeach
     </main>
 
     <footer class="wrapper">
