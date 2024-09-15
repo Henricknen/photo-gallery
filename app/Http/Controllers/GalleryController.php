@@ -3,6 +3,7 @@
 namespace App\Http\Controllers;
 
 use App\Models\Image; 
+use Exception;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Storage;
 
@@ -22,10 +23,15 @@ class GalleryController extends Controller {
             $return = $image->store('uploads', 'public');     // armazena a imagem no diretório 'uploads' no disco 'public'
             $url = asset('storage/'.$return);
 
-            Image::create([     // armazena 'title' e 'url' na tabela 'images' do banco de dados
-                'title'=> $title['title'],
-                'url'=> $url
-            ]);
+            try {
+                Image::create([     // salva a 'images' no banco de dados
+                    'title'=> $title['title'],
+                    'url'=> $url
+                ]);
+            } catch(Exception $error) {
+                Storage::disk('public')->delete($return);     // se houver um erro no upload da imagem 'catch' dispara um 'delete'
+            }
+
         }
 
         return redirect()-> route('index');     // retorna para o index 'automaticamente'
