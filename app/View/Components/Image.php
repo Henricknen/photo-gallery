@@ -6,15 +6,14 @@ use Closure;
 use Illuminate\Contracts\View\View;
 use Illuminate\View\Component;
 
-class Image extends Component {
-
+class Image extends Component {     // definindo a estrutura da imagem
     public $id;
     public $url;
     public $title;
     public function __construct($url, $title, $id = null) {
-        $this-> id = $id;
-        $this-> url = $url;
-        $this-> title = $title;
+        $this->id = $id;
+        $this->url = $url;
+        $this->title = $title;
     }
 
     public function render(): View|Closure|string {

@@ -30,13 +30,14 @@ return [
 
     'disks' => [
 
-        'local' => [
+        'local' => [       // disco 'local' é um arquivo local que será utilizado apenas pelo framework
             'driver' => 'local',
-            'root' => storage_path('app'),
+            'root' => storage_path('app/private'),
+            'serve' => true,
             'throw' => false,
         ],
 
-        'public' => [
+        'public' => [       // disco 'public' fica acessível na internet
             'driver' => 'local',
             'root' => storage_path('app/public'),
             'url' => env('APP_URL').'/storage',
