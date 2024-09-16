@@ -2,11 +2,11 @@
 
 namespace App\Http\Controllers;
 
-use App\Models\Image; 
-use Exception;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Storage;
-
+use Illuminate\Validation\Rules\Dimensions;
+use App\Models\Image; 
+use Exception;
 class GalleryController extends Controller {
     public function index() {  // função retorna a view index
         $image = Image::all();      // trazendo as imagens do bd para a tela
@@ -14,15 +14,32 @@ class GalleryController extends Controller {
     }
 
     public function upload(Request $request) {  // função que faz o 'upload' da imagem
+
+        $request->validate([        // validado dados do 'titulo' e da 'imagem'
+            'title'=> 'required|string|max:255|min:6',
+            'image'=> [
+                'required',
+                'image',
+                'mimes:jpeg,png,jpg,gif',
+                'max:6114',
+                (new Dimensions)->maxWidth(5500)->maxHeight(5500)     // tamanho maximo das imagens permitidas
+            ]
+            ]);
         
         if ($request->hasFile('image')) {  // verifica 'se existe' um arquivo com nome image
             $title = $request->only('title');       // titulo da imagem
             $image = $request->file('image');
             $name = $image->hashName();  // gera um nome único para a imagem
 
-            $return = $image->store('uploads', 'public');     // armazena a imagem no diretório 'uploads' no disco 'public'
-            $url = asset('storage/'.$return);
-
+            try {
+                $return = $image->store('uploads', 'public');     // armazena a imagem no diretório 'uploads' no disco 'public'
+                $url = asset('storage/'.$return);
+            } catch(Exception $error) {
+                return redirect()->back()->withErrors([
+                    'error'=> 'Erro ao salvar a imagem. Tente novamente.'
+                ]);
+            }
+            
             try {
                 Image::create([     // salva a 'images' no banco de dados
                     'title'=> $title['title'],
@@ -30,6 +47,9 @@ class GalleryController extends Controller {
                 ]);
             } catch(Exception $error) {
                 Storage::disk('public')->delete($return);     // se houver um erro no upload da imagem 'catch' dispara um 'delete'
+                return redirect()->back()->withErrors([
+                    'error'=> 'Erro ao salvar a imagem. Tente novamente.'
+                ]);
             }
 
         }
