@@ -15,44 +15,35 @@ class GalleryController extends Controller {
 
     public function upload(Request $request) {  // função que faz o 'upload' da imagem
 
-        $request->validate([        // validado dados do 'titulo' e da 'imagem'
-            'title'=> 'required|string|max:255|min:6',
-            'image'=> [
-                'required',
-                'image',
-                'mimes:jpeg,png,jpg,gif',
-                'max:6114',
-                (new Dimensions)->maxWidth(5500)->maxHeight(5500)     // tamanho maximo das imagens permitidas
-            ]
-            ]);
+        $this->validateRequest($request);       // utilizando função 'validateRequest' que faz validção dos dados
         
-        if ($request->hasFile('image')) {  // verifica 'se existe' um arquivo com nome image
-            $title = $request->only('title');       // titulo da imagem
-            $image = $request->file('image');
-            $name = $image->hashName();  // gera um nome único para a imagem
+        $title = $request->only('title');
+        $image = $request->file('image');
 
-            try {
-                $return = $image->store('uploads', 'public');     // armazena a imagem no diretório 'uploads' no disco 'public'
-                $url = asset('storage/'.$return);
-            } catch(Exception $error) {
-                return redirect()->back()->withErrors([
-                    'error'=> 'Erro ao salvar a imagem. Tente novamente.'
-                ]);
-            }
-            
-            try {
-                Image::create([     // salva a 'images' no banco de dados
-                    'title'=> $title['title'],
-                    'url'=> $url
-                ]);
-            } catch(Exception $error) {
-                Storage::disk('public')->delete($return);     // se houver um erro no upload da imagem 'catch' dispara um 'delete'
-                return redirect()->back()->withErrors([
-                    'error'=> 'Erro ao salvar a imagem. Tente novamente.'
-                ]);
-            }
+        // $image->hashName();  // gera um nome único para a imagem
 
+        try {
+            $url = $this->storageImageInDisk($image);       // ultilizando função 'storageImageInDisk' que salvará a imagem no localstorage
+
+        } catch(Exception $error) {
+            return redirect()->back()->withErrors([
+                'error'=> 'Erro ao salvar a imagem. Tente novamente.'
+            ]);
         }
+        
+        try {
+            Image::create([     // salva a 'images' no banco de dados
+                'title'=> $title['title'],
+                'url'=> $url
+            ]);
+        } catch(Exception $error) {
+            Storage::disk('public')->delete($imageName);     // se houver um erro no upload da imagem 'catch' dispara um 'delete'
+            return redirect()->back()->withErrors([
+                'error'=> 'Erro ao salvar a imagem. Tente novamente.'
+            ]);
+        }
+
+        
 
         return redirect()-> route('index');     // retorna para o index 'automaticamente'
     }
@@ -68,5 +59,23 @@ class GalleryController extends Controller {
          }
 
          return redirect()->route('index');
+    }
+
+    private function validateRequest(Request $request) {        // função recebe uma request e faz uma validação
+        $request->validate([        // validado dados do 'titulo' e da 'imagem'
+            'title'=> 'required|string|max:255|min:6',
+            'image'=> [
+                'required',
+                'image',
+                'mimes:jpeg,png,jpg,gif',
+                'max:6114',
+                (new Dimensions)->maxWidth(5500)->maxHeight(5500)     // tamanho maximo das imagens permitidas
+            ]
+        ]);
+    }
+
+    private function storageImageInDisk($image) {     // salva a imagem no 'localstorage'
+        $imageName = $image->store('uploads', 'public');     // armazena a imagem no diretório 'uploads' no disco 'public'
+        return asset('storage/'.$imageName);
     }
 }
