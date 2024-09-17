@@ -20,30 +20,17 @@ class GalleryController extends Controller {
         $title = $request->only('title');
         $image = $request->file('image');
 
-        // $image->hashName();  // gera um nome único para a imagem
-
         try {
             $url = $this->storageImageInDisk($image);       // ultilizando função 'storageImageInDisk' que salvará a imagem no localstorage
-
+            $databaseImage = $this->storageImageInDataBase($title['title'],$url);
+            
         } catch(Exception $error) {
+            $this->deleteDatabaseImage($databaseImage);
+            $this->deleteImageFromDisk($url);
             return redirect()->back()->withErrors([
                 'error'=> 'Erro ao salvar a imagem. Tente novamente.'
             ]);
-        }
-        
-        try {
-            Image::create([     // salva a 'images' no banco de dados
-                'title'=> $title['title'],
-                'url'=> $url
-            ]);
-        } catch(Exception $error) {
-            Storage::disk('public')->delete($imageName);     // se houver um erro no upload da imagem 'catch' dispara um 'delete'
-            return redirect()->back()->withErrors([
-                'error'=> 'Erro ao salvar a imagem. Tente novamente.'
-            ]);
-        }
-
-        
+        }        
 
         return redirect()-> route('index');     // retorna para o index 'automaticamente'
     }
@@ -77,5 +64,24 @@ class GalleryController extends Controller {
     private function storageImageInDisk($image) {     // salva a imagem no 'localstorage'
         $imageName = $image->store('uploads', 'public');     // armazena a imagem no diretório 'uploads' no disco 'public'
         return asset('storage/'.$imageName);
+    }
+
+    private function storageImageInDataBase($title, $url) {
+        return Image::create([     // salva a 'images' no banco de dados
+                'title'=> $title,
+                'url'=> $url
+            ]);
+    }
+
+    private function deleteImageFromDisk($imageUrl) {
+
+        $imagePath = str_replace(asset('storage/', '', $imageUrl));
+        Storage::disk('public')->delete($imagePath);     // se houver um erro no upload da imagem 'catch' dispara um 'delete'
+    }
+
+    private function deleteDatabaseImage($databaseImage) {
+        if($databaseImage) {
+            $databaseImage->delelte();
+        }
     }
 }
