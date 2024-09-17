@@ -14,19 +14,19 @@ class GalleryController extends Controller {
     }
 
     public function upload(Request $request) {  // função que faz o 'upload' da imagem
-
         $this->validateRequest($request);       // utilizando função 'validateRequest' que faz validção dos dados
         
         $title = $request->only('title');
         $image = $request->file('image');
 
         try {
-            $url = $this->storageImageInDisk($image);       // ultilizando função 'storageImageInDisk' que salvará a imagem no localstorage
+            $url = $this->storageImageInDisk($image);       // armazenando função 'storageImageInDisk' que salvará a imagem no localstorage na variável '$url'
             $databaseImage = $this->storageImageInDataBase($title['title'],$url);
             
         } catch(Exception $error) {
             $this->deleteDatabaseImage($databaseImage);
             $this->deleteImageFromDisk($url);
+
             return redirect()->back()->withErrors([
                 'error'=> 'Erro ao salvar a imagem. Tente novamente.'
             ]);
@@ -75,13 +75,13 @@ class GalleryController extends Controller {
 
     private function deleteImageFromDisk($imageUrl) {
 
-        $imagePath = str_replace(asset('storage/', '', $imageUrl));
+        $imagePath = str_replace(asset('storage/'), '', $imageUrl);
         Storage::disk('public')->delete($imagePath);     // se houver um erro no upload da imagem 'catch' dispara um 'delete'
     }
 
     private function deleteDatabaseImage($databaseImage) {
         if($databaseImage) {
-            $databaseImage->delelte();
+            $databaseImage->delete();
         }
     }
 }
