@@ -6,8 +6,16 @@ use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Storage;
 use Illuminate\Validation\Rules\Dimensions;
 use App\Models\Image; 
+use App\Services\ImageService; 
 use Exception;
 class GalleryController extends Controller {
+
+    protected $imageService;
+
+    public function __construct(ImageService $imageService) {        // 'injeção de dependência' construtor recebe a instância de 'ImageService'
+        $this->imageService = $imageService;        // e popula a propriedade '$imageService'
+    }
+
     public function index() {  // função retorna a view index
         $image = Image::all();      // trazendo as imagens do bd para a tela
         return view('index', ['images'=> $image]);
@@ -20,12 +28,12 @@ class GalleryController extends Controller {
         $image = $request->file('image');
 
         try {
-            $url = $this->storageImageInDisk($image);       // armazenando função 'storageImageInDisk' que salvará a imagem no localstorage na variável '$url'
-            $databaseImage = $this->storageImageInDataBase($title['title'],$url);
+            $url = $this->imageService->storageImageInDisk($image);       // armazenando função 'storageImageInDisk' que salvará a imagem no localstorage na variável '$url'
+            $databaseImage = $this->imageService->storageImageInDataBase($title['title'],$url);
             
         } catch(Exception $error) {
-            $this->deleteDatabaseImage($databaseImage);
-            $this->deleteImageFromDisk($url);
+            $this->imageService->deleteDatabaseImage($databaseImage);
+            $this->imageService->deleteImageFromDisk($url);
 
             return redirect()->back()->withErrors([
                 'error'=> 'Erro ao salvar a imagem. Tente novamente.'
@@ -59,29 +67,5 @@ class GalleryController extends Controller {
                 (new Dimensions)->maxWidth(5500)->maxHeight(5500)     // tamanho maximo das imagens permitidas
             ]
         ]);
-    }
-
-    private function storageImageInDisk($image) {     // salva a imagem no 'localstorage'
-        $imageName = $image->store('uploads', 'public');     // armazena a imagem no diretório 'uploads' no disco 'public'
-        return asset('storage/'.$imageName);
-    }
-
-    private function storageImageInDataBase($title, $url) {
-        return Image::create([     // salva a 'images' no banco de dados
-                'title'=> $title,
-                'url'=> $url
-            ]);
-    }
-
-    private function deleteImageFromDisk($imageUrl) {
-
-        $imagePath = str_replace(asset('storage/'), '', $imageUrl);
-        Storage::disk('public')->delete($imagePath);     // se houver um erro no upload da imagem 'catch' dispara um 'delete'
-    }
-
-    private function deleteDatabaseImage($databaseImage) {
-        if($databaseImage) {
-            $databaseImage->delete();
-        }
     }
 }
