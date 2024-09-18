@@ -7,12 +7,22 @@ use App\Models\Image;
 use Illuminate\Support\Facades\Storage;
 
 class imageService implements ImageServiceInterface {       // implements ImageServiceInterface  implementando interfaçe 'ImageSerrviceInterface'
-   public function storeImageInDisk($image): string {           // método salva a imagem de forma publica e retorna um caminho para a mesma
+
+    public function storareNewImage($image, $title): image {        // método 'storareNewImage' cria a imagem e grava no banco de dados
+        try {       // grava os dados, faz o 'update'
+            $url = $this->storeImageInDisk($image);
+            return $this->storeImageInDataBase($title, $url);
+        } catch(Exception $e) {     // caso de algum erro retorna uma menssagem
+            throw new Error('Erro ao salvar a imagem, tente novamente...');
+        }
+    }
+
+   private function storeImageInDisk($image): string {           // método salva a imagem de forma publica e retorna um caminho para a mesma
        $imageName = $image->store('uploads', 'public');             // caminho
        return asset('storage/' . $imageName);
    } 
 
-   public function storeImageInDataBase($title, $url): Image {
+   private function storeImageInDataBase($title, $url): Image {     // 'private' transform em métodos espeçificos do 'ImageService'
        return Image::create([     // salva a 'images' no banco de dados
            'title'=> $title,
            'url'=> $url
