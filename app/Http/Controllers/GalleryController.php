@@ -8,9 +8,11 @@ use Illuminate\Validation\Rules\Dimensions;
 use App\Models\Image; 
 use App\Services\ImageService; 
 use Exception;
+use App\Interfaces\ImageServiceInterface;
+
 class GalleryController extends Controller {
 
-    protected $imageService;
+    protected $imageService;        // propriedade protegida
 
     public function __construct(ImageService $imageService) {        // 'injeção de dependência' construtor recebe a instância de 'ImageService'
         $this->imageService = $imageService;        // e popula a propriedade '$imageService'
@@ -28,11 +30,11 @@ class GalleryController extends Controller {
         $image = $request->file('image');
 
         try {
-            $url = $this->imageService->storageImageInDisk($image);       // armazenando função 'storageImageInDisk' que salvará a imagem no localstorage na variável '$url'
-            $databaseImage = $this->imageService->storageImageInDataBase($title['title'],$url);
+            $url = $this->imageService->storeImageInDisk($image);       // armazenando função 'storageImageInDisk' que salvará a imagem no localstorage na variável '$url'
+            $databaseImage = $this->imageService->storeImageInDataBase($title['title'],$url);
             
         } catch(Exception $error) {
-            $this->imageService->deleteDatabaseImage($databaseImage);
+            $this->imageService->deleteImageDatabaseImage($databaseImage);
             $this->imageService->deleteImageFromDisk($url);
 
             return redirect()->back()->withErrors([
