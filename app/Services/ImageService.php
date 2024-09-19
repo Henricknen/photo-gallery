@@ -25,7 +25,16 @@ class imageService implements ImageServiceInterface {       // implements ImageS
     }
 
     public function rollback($databaseImage) {      // método 'rollback' é responsável por deleta a imagem do localstorage e do banco de dados
-        
+        if(!empty($this->rollbackQueue)) {      // se a fila não estiver vazia
+            foreach($this->rollbackQueue as $interaction) {     // percorrendo a fila rollbackQueue
+                $method = $interaction['method'];
+                $params = $interaction['params'];
+
+                if(method_exists($this, $method)) {     // se o metodo existir
+                    call_user_func_array([$this,$method], $params);     // chama o método e os parâmetros do mesmo
+                }
+            }
+        }
     }
 
     public function storeNewImage($image, $title): image {        // método 'storareNewImage' cria a imagem e grava no banco de dados
