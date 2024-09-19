@@ -7,6 +7,8 @@ use App\Models\Image;
 use Illuminate\Support\Facades\Storage;
 
 class imageService implements ImageServiceInterface {       // implements ImageServiceInterface  implementando interfaçe 'ImageSerrviceInterface'
+
+    private $rollbackQueue = null;      // fila nula
     
     public function deleteImageFromDisk($imageUrl): bool {
         $imagePath = str_replace(asset('storage/'), '', $imageUrl);
@@ -43,10 +45,19 @@ class imageService implements ImageServiceInterface {       // implements ImageS
    } 
 
    private function storeImageInDataBase($title, $url): Image {     // 'private' transform em métodos espeçificos do 'ImageService'
-       return Image::create([     // salva a 'images' no banco de dados
+       $image = Image::create([     // salva a 'images' no banco de dados
            'title'=> $title,
            'url'=> $url
        ]);
+
+       $this->addToRollbackQueue('deleteImageDatabaseImage', [$image]);       // adiçionando na Queue de rollback o método 'deleteImageDatabaseImage'
+   }
+
+   private function addToRollbackQueue() {      // método 'addToRollbackQueue' adicionará o método que será executado e os parâmetros desse método
+        $this->rollbackQueue[] = [
+            'method' => $method,
+            'params' => $params
+        ];
    }
 
 }
