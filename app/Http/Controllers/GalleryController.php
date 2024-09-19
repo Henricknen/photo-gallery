@@ -40,7 +40,7 @@ class GalleryController extends Controller {
             // $this->imageService->deleteImageDatabaseImage($databaseImage);
             // $this->imageService->deleteImageFromDisk($databaseImage->url);
 
-            $this->imageService->rollback($databaseImage);       // chamando o método 'rollback'
+            $this->imageService->rollback();       // chamando o método 'rollback'
 
             return redirect()->back()->withErrors([
                 'error'=> 'Erro ao salvar a imagem. Tente novamente.'

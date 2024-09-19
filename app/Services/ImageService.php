@@ -25,9 +25,7 @@ class imageService implements ImageServiceInterface {       // implements ImageS
     }
 
     public function rollback($databaseImage) {      // método 'rollback' é responsável por deleta a imagem do localstorage e do banco de dados
-        sleep(5);       // 'sleep' para verificar 'funcionamento' do rollback
-        $this->deleteImageDatabaseImage($databaseImage);
-        $this->deleteImageFromDisk($databaseImage->url);
+        
     }
 
     public function storeNewImage($image, $title): image {        // método 'storareNewImage' cria a imagem e grava no banco de dados
@@ -41,7 +39,9 @@ class imageService implements ImageServiceInterface {       // implements ImageS
 
    private function storeImageInDisk($image): string {           // método salva a imagem de forma publica e retorna um caminho para a mesma
        $imageName = $image->store('uploads', 'public');             // caminho
-       return asset('storage/' . $imageName);
+       $url = asset('storage/' . $imageName);
+       $this->addToRollbackQueue('deleteImageFromDisk', [$url]);        // passando url da imagem que será deletada
+       return $url;
    } 
 
    private function storeImageInDataBase($title, $url): Image {     // 'private' transform em métodos espeçificos do 'ImageService'
@@ -51,6 +51,7 @@ class imageService implements ImageServiceInterface {       // implements ImageS
        ]);
 
        $this->addToRollbackQueue('deleteImageDatabaseImage', [$image]);       // adiçionando na Queue de rollback o método 'deleteImageDatabaseImage'
+       return $image;
    }
 
    private function addToRollbackQueue() {      // método 'addToRollbackQueue' adicionará o método que será executado e os parâmetros desse método
