@@ -33,13 +33,9 @@ class GalleryController extends Controller {
             // $url = $this->imageService->storeImageInDisk($image);       // armazenando função 'storageImageInDisk' que salvará a imagem no localstorage na variável '$url'
             // $databaseImage = $this->imageService->storeImageInDataBase($title['title'],$url);
 
-            $databaseImage = $this->imageService->storeNewImage($image, $title['title']);
-            throw new Exception('.....');       // força um erro para 'teste'
+            $this->imageService->storeNewImage($image, $title['title']);
             
         } catch(Exception $error) {
-            // $this->imageService->deleteImageDatabaseImage($databaseImage);
-            // $this->imageService->deleteImageFromDisk($databaseImage->url);
-
             $this->imageService->rollback();       // chamando o método 'rollback'
 
             return redirect()->back()->withErrors([
